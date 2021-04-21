@@ -1,11 +1,11 @@
-const amqp = require('amqplib/callback_api')
-const express = require('express')
+const amqp = require("amqplib/callback_api")
+const ex = require("express")
 
-AMQP_URI = 'amqp://guest:guest@rabbitmq:5672'
+AMQP_URI = "amqp://guest:guest@rabbitmq:5672"
 
-app = express()
+app = ex()
 
-const send_msg = () => {
+const send_msg = (data) => {
     amqp.connect(AMQP_URI, (connEror, connection) => {
         if (connEror) {
             throw connEror
@@ -18,22 +18,25 @@ const send_msg = () => {
 
             const QUEUE = process.env.QUEUE_NAME
             msg = {
-                data: 'json',
-                type: 'string',
+                data: data,
+                type: "string",
                 timeStamp: Date.now(),
             }
-            channel.assertQueue(QUEUE)
+            channel.assertQueue(QUEUE, {
+                durable: false
+            })
 
             channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(msg)))
 
-            console.log(`Queue name: ${QUEUE}, message: {msg}`)
+            console.log(`Queue name: ${QUEUE}, message: ${JSON.stringify(msg)}`)
         })
     })
 }
-app.get('/send', (req, res) => {
-    send_msg()
+app.get("/send/:data", (req, res) => {
+    let data = req.params.data
+    send_msg(data)
     res.json({
-        message: 'etst',
+        message: `Send data ${data}`,
     })
 })
 

@@ -21,18 +21,30 @@ services:
     receiver_01:
         build: receiver/
         container_name: receiver_01
-        restart: always
+        restart: on-failure
         environment: 
             - QUEUE_NAME=${QUEUE_NAME}
+            - TZ=Asia/Bankok
         depends_on: 
             - rabbitmq
 
     receiver_02:
         build: receiver/
         container_name: receiver_02
-        restart: always
+        restart: on-failure
         environment: 
             - QUEUE_NAME=${QUEUE_NAME}
+            - TZ=Asia/Bankok
+        depends_on: 
+            - rabbitmq
+    
+    receiver_03:
+        build: receiver/
+        container_name: receiver_03
+        restart: on-failure
+        environment: 
+            - QUEUE_NAME=${QUEUE_NAME}
+            - TZ=Asia/Bangkok
         depends_on: 
             - rabbitmq
         

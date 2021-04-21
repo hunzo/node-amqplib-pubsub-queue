@@ -8,4 +8,4 @@ COPY sender.js .
 RUN npm install
 RUN npm install pm2 -g
 
-CMD pm2-runtime sender.js -i 4
+CMD pm2-runtime sender.js -i 1

@@ -1,7 +1,6 @@
 const amqp = require("amqplib/callback_api")
 
-function show(msg) {
-    console.log(msg)
+function showHostname(msg) {
     console.log(`Host name: ${process.env.HOSTNAME}`)
 }
 
@@ -20,15 +19,19 @@ amqp.connect(
             }
 
             const QUEUE = process.env.QUEUE_NAME
-            channel.assertQueue(QUEUE)
+            channel.assertQueue(QUEUE, {
+                durable: false
+            })
             // channel.ackAll(QUEUE1)
-
+            channel.prefetch(1)
             channel.consume(QUEUE, (msg) => {
                 // console.log(`message receive json: ${JSON.stringify(msg)}`)
                 console.log(`message receive: ${msg.content.toString()}`)
-                show(msg.fields)
+                showHostname(msg.fields)
                 // console.log(typeof msg)
                 channel.ack(msg)
+            }, {
+                noAck: false
             })
         })
     }
