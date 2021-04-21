@@ -1,0 +1,1 @@
+# node-amqplib-pubsub-queue
