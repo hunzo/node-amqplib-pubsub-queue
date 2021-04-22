@@ -1,38 +1,31 @@
-const amqp = require("amqplib/callback_api")
-const ex = require("express")
+const amqp = require('amqplib')
+const ex = require('express')
 
-AMQP_URI = "amqp://guest:guest@rabbitmq:5672"
+AMQP_URI = 'amqp://guest:guest@rabbitmq:5672'
 
 app = ex()
 
 const send_msg = (data) => {
-    amqp.connect(AMQP_URI, (connEror, connection) => {
-        if (connEror) {
-            throw connEror
-        }
+    amqp.connect(AMQP_URI)
+        .then((conn) => {
+            return conn
+                .createChannel()
+                .then((ch) => {
+                    let QUEUE = process.env.QUEUE
 
-        connection.createChannel((channelError, channel) => {
-            if (channelError) {
-                throw channelError
-            }
+                    let ok = ch.assertQueue(QUEUE, { durable: false })
 
-            const QUEUE = process.env.QUEUE_NAME
-            msg = {
-                data: data,
-                type: "string",
-                timeStamp: Date.now(),
-            }
-            channel.assertQueue(QUEUE, {
-                durable: false
-            })
-
-            channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(msg)))
-
-            console.log(`Queue name: ${QUEUE}, message: ${JSON.stringify(msg)}`)
+                    return ok.then((_qok) => {
+                        ch.sendToQueue(QEUE, Buffer.from(data))
+                        console.log(`Send Message: ${data} to QUEUES`)
+                        return ch.close()
+                    })
+                })
+                .finally(() => conn.close())
         })
-    })
+        .catch(console.warn)
 }
-app.get("/send/:data", (req, res) => {
+app.get('/send/:data', (req, res) => {
     let data = req.params.data
     send_msg(data)
     res.json({
