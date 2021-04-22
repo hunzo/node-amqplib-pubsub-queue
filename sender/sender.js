@@ -11,12 +11,12 @@ const send_msg = (data) => {
             return conn
                 .createChannel()
                 .then((ch) => {
-                    let QUEUE = process.env.QUEUE
+                    let QUEUE = process.env.QUEUE_NAME
 
                     let ok = ch.assertQueue(QUEUE, { durable: false })
 
                     return ok.then((_qok) => {
-                        ch.sendToQueue(QEUE, Buffer.from(data))
+                        ch.sendToQueue(QUEUE, Buffer.from(data))
                         console.log(`Send Message: ${data} to QUEUES`)
                         return ch.close()
                     })
